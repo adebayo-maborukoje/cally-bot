@@ -1,6 +1,6 @@
 // Your Client ID can be retrieved from your project in the Google
 // Developer Console, https://console.developers.google.com
-var needle = require("needle");
+var needle = require('needle');
 var path = require('path');
 // obtain a JWT-enabled version of request
 var request = require('google-oauth-jwt').requestWithJWT();

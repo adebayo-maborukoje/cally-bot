@@ -10,50 +10,44 @@ var token = 'xoxb-6098518390-PMvTDFpU7DcunPMV3YIWyYS0';
 var axios = require('axios');
 var googleApi = require('./googleApi');
 
+var Promise = require('bluebird');
+
 module.exports = function(robot) {
     //Admin can get the list of all calendar events
     robot.hear(/list-all/i, function(res) {
+        // console.log('name',res.message.user.name);
+        var channel = 'G064YFGG1';
+        var isMemberPromise = belongsToGroup(channel, res.message.user.id).then(function(isMember) {
+            // console.log('groups', groups);
+            return (isMember !== -1);
+        });
 
-        isAdmin(res.message.user.id).then(function(isAnAdmin) {
-            if (isAnAdmin) {
-                return googleApi.getAllDates();
-            } else {
-                return []; // Not admin, retrieve just some dates
-            }
-        }).then(function(dates) {
-            console.log('dates:', dates);
-            var messages = dates.map(function(date) {
-                var id = date.id;
-                var status = date.status;
-                var startDates = date.start.dateTime || date.start.date;
-                return id + ' - ' + status + ' - ' + startDates;
-            });
+        var isAdminPromise = isAdmin(res.message.user.id);
 
-            res.send(messages.join("\n"));
-        }).catch(function(err) {
-            console.log("ERR:", err);
+        Promise.all([isMemberPromise, isAdminPromise]).spread(function(isMember, isAdmin) {
+          if (isMember || isAdmin) {
+              googleApi.getAllDates().then(function(dates) {
+                var messages = dates.map(function(date) {
+                    var id = date.id;
+                    var status = date.status;
+                    var startDates = date.start.dateTime || date.start.date;
+                    return id + ' - ' + status + ' - ' + startDates;
+                });
+                res.send(messages.join('\n'));
+              });
+          }
         });
     });
 
     // get single user leave date
     // a Single user can check his/her own leave date
     robot.hear(/show/i, function(res) {
-      console.log(res);
+        console.log(res);
         var userName = res.message.user.name;
         var userEmail = res.message.user.email_address;
-        console.log('user', user);
+        // console.log('user', user);
         // send email to google to fetch the leave date of that user
     });
-
-
-
-    // function listAll() {
-    //     axios.get(BaseUrl + 'users.list?token=xoxb-6098518390-PMvTDFpU7DcunPMV3YIWyYS0')
-    //         .then(function(response) {
-    //             var andela = response.data;
-    //             // console.log('total ', andela.members.is_admin);
-    //         });
-    // }
 
     function isAdmin(userid) {
         //this is the admin user (sayo-- used in test case for admin users)
@@ -61,7 +55,6 @@ module.exports = function(robot) {
         return axios.get(BaseUrl + 'users.info?token=' + token + '&user=' + userid)
             .then(function(response) {
                 var andela = response.data;
-                console.log('hss', andela.user.is_admin);
                 return andela.user.is_admin;
             });
     }
@@ -69,10 +62,14 @@ module.exports = function(robot) {
     // this check is necessary in other to allow some non admin user also check the list
     // However only users belonging to a particular private channel will be privy to it.
 
-    // function beleongsToGroup() {
-    // robot.http(BaseUrl+'groups.list?token='+token).get()(function (err, resp, data){
-    //   var groups = JSON.parse(data);
-
-    // });
-
+    function belongsToGroup(channel, requester) {
+        // channel = 'G064YFGG1';
+        return axios.get(BaseUrl + 'groups.info?token=' + token + '&channel=' + channel).then(function(response) {
+            var slackGroupMembers = response.data.group.members;
+            var isMember = slackGroupMembers.indexOf(requester);
+            return isMember;
+        });
+    }
 };
+
+

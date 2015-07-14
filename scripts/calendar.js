@@ -13,29 +13,32 @@ var googleApi = require('./googleApi');
 var Promise = require('bluebird');
 
 module.exports = function(robot) {
+
     //Admin can get the list of all calendar events
     robot.hear(/list-all/i, function(res) {
-        // console.log('name',res.message.user.name);
-        var channel = 'G064YFGG1';
+        var channel = 'G064YFGG1'; // This is test-cally channel id
         var isMemberPromise = belongsToGroup(channel, res.message.user.id).then(function(isMember) {
-            // console.log('groups', groups);
             return (isMember !== -1);
         });
 
         var isAdminPromise = isAdmin(res.message.user.id);
 
         Promise.all([isMemberPromise, isAdminPromise]).spread(function(isMember, isAdmin) {
-          if (isMember || isAdmin) {
-              googleApi.getAllDates().then(function(dates) {
-                var messages = dates.map(function(date) {
-                    var id = date.id;
-                    var status = date.status;
-                    var startDates = date.start.dateTime || date.start.date;
-                    return id + ' - ' + status + ' - ' + startDates;
-                });
-                res.send(messages.join('\n'));
-              });
-          }
+            if (isMember || isAdmin) {
+                return googleApi.getAllDates();
+            } else {
+                return [];
+            }
+        }).then(function(dates) {
+            var messages = dates.map(function(date) {
+                var id = date.id;
+                var status = date.status;
+                var startDates = date.start.dateTime || date.start.date;
+                return id + ' - ' + status + ' - ' + startDates;
+            });
+            res.send(messages.join('\n'));
+        }).catch(function(err) {
+            console.log('Error', err.stack);
         });
     });
 
@@ -50,7 +53,7 @@ module.exports = function(robot) {
     });
 
     function isAdmin(userid) {
-        //this is the admin user (sayo-- used in test case for admin users)
+        //this is the admin user (sayo -- used in test case for admin users)
         // userid = 'U03LJ0TRH';
         return axios.get(BaseUrl + 'users.info?token=' + token + '&user=' + userid)
             .then(function(response) {
@@ -71,5 +74,3 @@ module.exports = function(robot) {
         });
     }
 };
-
-

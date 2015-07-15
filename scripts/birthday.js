@@ -24,7 +24,7 @@ module.exports = function(robot) {
         var msg = birthdayTemplates[Math.floor(Math.random()* birthdayTemplates.length)];
         return hogan.compile(msg).render({name: name})
       }).join("\n");
-      // robot.send({room: '#general'}, message)
+      robot.send({room: '#general'}, message)
       // robot.send({room: 'adebayo.m'}, message)
 
     }).catch(function(err) {
@@ -32,8 +32,7 @@ module.exports = function(robot) {
     });
   }
   // This is the scheduler that sends Birthday messages every 8 am of the day whenever there is a Birthday.
-  // new CronJob('00 00 08 * * *', sendBirthdays, null, true);
-  new CronJob('00/5 * * * * *', sendBirthdays, null, true);
+  new CronJob('00 00 08 * * *', sendBirthdays, null, true);
   // robot.send({room: 'test-cally'}, "i feel blessed")
 };
 

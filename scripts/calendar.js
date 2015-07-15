@@ -22,7 +22,6 @@ module.exports = function(robot) {
         });
 
         var isAdminPromise = isAdmin(res.message.user.id);
-
         Promise.all([isMemberPromise, isAdminPromise]).spread(function(isMember, isAdmin) {
             if (isMember || isAdmin) {
                 return googleApi.getAllDates();

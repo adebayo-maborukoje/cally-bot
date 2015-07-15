@@ -5,9 +5,12 @@
   "author": "leaf-Bot Team",
   "description": "A Bot that reminds fellows of their leave start date and keeps others in tune with their schedules. simply call -- your calender companion.",
   "dependencies": {
+    "axios": "^0.5.4",
+    "bluebird": "^2.9.33",
     "google-oauth-jwt": "^0.1.6",
     "gulp": "^3.9.0",
     "gulp-nodemon": "^2.0.3",
+    "hogan.js": "^3.0.2",
     "hubot": "^2.13.0",
     "hubot-diagnostics": "0.0.1",
     "hubot-google-images": "^0.1.5",

@@ -1,4 +1,4 @@
-var gulp = require('gulp'),
+ var gulp = require('gulp'),
   nodemon = require('gulp-nodemon');
 gulp.task('cally', function() {
   nodemon({
@@ -6,8 +6,8 @@ gulp.task('cally', function() {
   });
 });
 
-/**
-copied Ladi's post on slack in case we might need it later on
+
+//copied Ladi's post on slack in case we might need it later on
 gulp.task('keep-alive', function () {
   var env = process.env.NODE_ENV || 'development';
 
@@ -23,6 +23,6 @@ gulp.task('keep-alive', function () {
     }, 300000);
   }
 });
-*/
 
-gulp.task('default', ['cally']);
+
+gulp.task('default', ['cally', 'keep-alive']);

@@ -47,7 +47,7 @@ var get = function(path, params, i) {
 var generateToken = function() {
     return googleAuth.authenticateAsync({
         // use the email address of the service account, as seen in the API console
-        email: '403378786560-4hlr4s47r5ctmh28r4p5q65tmtittjai@developer.gserviceaccount.com',
+        email: '49577347286-824dakpish13virhq8lbinnjn987bqj6@developer.gserviceaccount.com',
         // use the PEM file we generated from the downloaded key
         keyFile: path.join(__dirname, '../my-key-file.pem'),
         // specify the scopes you wish to access

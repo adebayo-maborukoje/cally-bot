@@ -1,22 +1,21 @@
-'use strict';
-
 //This is to communicate directly with google calendar Api.
 //https://www.googleapis.com/calendar/v3/calendars/calendarId/events
+// 'use strict';
 
 var Promise = require('bluebird');
 var path = require('path');
-
-// obtain a JWT-enabled version of request
+var axios = require('axios');
+var fs = Promise.promisifyAll(require('fs'));
+var token = fs.readFileSync('token.txt').toString(); // this file does not exist at the moment
 var request = require('google-oauth-jwt').requestWithJWT();
 var googleAuth = Promise.promisifyAll(require('google-oauth-jwt'));
+
+
 var baseurl = 'https://www.googleapis.com/calendar/v3/calendars/',
     fellowsLeaveId = 'andela.co_8q5ndpq7vfikvmrinv0oladgd8@group.calendar.google.com',
     staffLeaveId = 'andela.co_vq4m4skcvvg16f4r7mj33etsk8@group.calendar.google.com',
     birthdayId = 'andela.co_26ma585mqntc4u4gapgsksahno@group.calendar.google.com',
     interviewId  = 'andela.co_a0s8rmptjt2uee62liudvmsnhg@group.calendar.google.com';
-var axios = require('axios');
-var fs = Promise.promisifyAll(require('fs'));
-var token = fs.readFileSync('token.txt').toString();
 
 // Axios interceptor
 // Sends the Authorization as an Header with every request made to the Api
@@ -51,7 +50,8 @@ var generateToken = function() {
         // use the PEM file we generated from the downloaded key
         keyFile: path.join(__dirname, '../my-key-file.pem'),
         // specify the scopes you wish to access
-        scopes: ['https://www.googleapis.com/auth/calendar']
+        scopes: ['https://www.googleapis.com/auth/calendar'],
+        delegationEmail: 'chibuzor.obiora@andela.com'
     }).then(function(newToken) {
         token = newToken;
         return fs.writeFileAsync('token.txt', token);

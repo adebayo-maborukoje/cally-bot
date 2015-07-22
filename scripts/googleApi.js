@@ -1,6 +1,6 @@
 //This is to communicate directly with google calendar Api.
 //https://www.googleapis.com/calendar/v3/calendars/calendarId/events
-// 'use strict';
+'use strict';
 
 var Promise = require('bluebird');
 var path = require('path');
@@ -12,80 +12,79 @@ var googleAuth = Promise.promisifyAll(require('google-oauth-jwt'));
 
 
 var baseurl = 'https://www.googleapis.com/calendar/v3/calendars/',
-    fellowsLeaveId = 'andela.co_8q5ndpq7vfikvmrinv0oladgd8@group.calendar.google.com',
-    staffLeaveId = 'andela.co_vq4m4skcvvg16f4r7mj33etsk8@group.calendar.google.com',
-    birthdayId = 'andela.co_26ma585mqntc4u4gapgsksahno@group.calendar.google.com',
-    interviewId  = 'andela.co_a0s8rmptjt2uee62liudvmsnhg@group.calendar.google.com';
+  fellowsLeaveCalendarId = 'andela.co_8q5ndpq7vfikvmrinv0oladgd8@group.calendar.google.com',
+  staffLeaveCalendarId = 'andela.co_vq4m4skcvvg16f4r7mj33etsk8@group.calendar.google.com',
+  birthdayCalendarId = 'andela.co_26ma585mqntc4u4gapgsksahno@group.calendar.google.com',
+  interviewCalendarId = 'andela.co_a0s8rmptjt2uee62liudvmsnhg@group.calendar.google.com';
 
 // Axios interceptor
 // Sends the Authorization as an Header with every request made to the Api
 axios.interceptors.request.use(function(config) {
-    config.headers.Authorization = 'Bearer ' + token;
-    return config;
+  config.headers.Authorization = 'Bearer ' + token;
+  return config;
 });
 
 //  Generates the Access token for the first time if Google returns an error;
-//
 var get = function(path, params, i) {
-    i = i || 3;
-    if (i === 0) return Promise.reject('Token generation failed after 3 attempts');
-    return axios.get(baseurl + path, params).then(function(response) {
-        return response.data;
-    }).catch(function(err) {
-        if (err.status === 401) {
-            return generateToken().then(function() {
-                return get(path, params, i--);
-            });
-        } else {
-            return err;
-        }
-    });
+  i = i || 3;
+  if (i === 0) return Promise.reject('Token generation failed after 3 attempts');
+  return axios.get(baseurl + path, params).then(function(response) {
+    return response.data;
+  }).catch(function(err) {
+    if (err.status === 401) {
+      return generateToken().then(function() {
+        return get(path, params, i--);
+      });
+    } else {
+      return err;
+    }
+  });
 };
 
 //  Generates a Token using Google Auth
 var generateToken = function() {
-    return googleAuth.authenticateAsync({
-        // use the email address of the service account, as seen in the API console
-        email: '49577347286-824dakpish13virhq8lbinnjn987bqj6@developer.gserviceaccount.com',
-        // use the PEM file we generated from the downloaded key
-        keyFile: path.join(__dirname, '../my-key-file.pem'),
-        // specify the scopes you wish to access
-        scopes: ['https://www.googleapis.com/auth/calendar'],
-        delegationEmail: 'chibuzor.obiora@andela.com'
-    }).then(function(newToken) {
-        token = newToken;
-        return fs.writeFileAsync('token.txt', token);
-    }).then(function(message) {
-        console.log('done');
-    }).catch(function(err) {
-        console.log('problem,', err.message);
-    });
+  return googleAuth.authenticateAsync({
+    // use the email address of the service account, as seen in the API console
+    email: '49577347286-824dakpish13virhq8lbinnjn987bqj6@developer.gserviceaccount.com',
+    // use the PEM file we generated from the downloaded key
+    keyFile: path.join(__dirname, '../my-key-file.pem'),
+    // specify the scopes you wish to access
+    scopes: ['https://www.googleapis.com/auth/calendar'],
+    delegationEmail: 'chibuzor.obiora@andela.com'
+  }).then(function(newToken) {
+    token = newToken;
+    return fs.writeFileAsync('token.txt', token);
+  }).then(function(message) {
+    console.log('done');
+  }).catch(function(err) {
+    console.log('problem,', err.message);
+  });
 };
 
 //get the list of all leave dates
 var getAllDates = function() {
-    return get(fellowsLeaveId + '/events', {
-        params: {
-            alwaysIncludeEmail: true,
-            maxResults: 10
-        }
-    }).then(function(data) {
-        console.log('data', data);
-        return data.items;
-    });
+  return get(fellowsLeaveCalendarId + '/events', {
+    params: {
+      alwaysIncludeEmail: true,
+      maxResults: 10
+    }
+  }).then(function(data) {
+    console.log('data', data);
+    return data.items;
+  });
 };
 
-var getNextBirthday = function () {
-    return get(birthdayId + '/events', {
-        params : {
-            alwaysIncludeEmail: true
-        }
-    }).then(function (result){
-        return result.items;
-    } );
+var getNextBirthday = function() {
+  return get(birthdayCalendarId + '/events', {
+    params: {
+      alwaysIncludeEmail: true
+    }
+  }).then(function(result) {
+    return result.items;
+  });
 };
 
 module.exports = {
-    getAllDates: getAllDates,
-    getNextBirthday: getNextBirthday
+  getAllDates: getAllDates,
+  getNextBirthday: getNextBirthday
 };

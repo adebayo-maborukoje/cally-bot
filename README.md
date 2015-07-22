@@ -18,13 +18,14 @@ In this sequence `curl -H "Authorization: Bearer <GENERATED-TOKEN>" <CALENDAR_ID
 ###Files 
 cally-bot/
 * scripts/token.js : code that generates token on `leave` command currently *
-* scripts/script.js : code that will house logic for calling file functions and using their responses
+* scripts/calli.js : code that will house logic for calling file functions and using their responses
 * scripts/interview.js : code that will house core logic for the interview aspect of cally
-* scripts/calendar.js : code that will house core logic for the calendar aspect of cally
+* scripts/leave.js : code that will house core logic for the calendar aspect of cally
 * scripts/help.js : code for informational commands and responses like `cally` responding to its name
 * gulpfile.js : our tasks
 * cally-bot/shell.js : code that contains script for running hubot on command line. It is required in the gulpfile 
-* my-key-file.pem : contians the private key that is generated from the developer account. 
+* my-key-file.pem : contains the private key that is generated from the developer account. 
+* token.txt : contains the token called recieved from google. 
 
 
 I followed this [article](https://github.com/extrabacon/google-oauth-jwt) to achieve the most of the above.

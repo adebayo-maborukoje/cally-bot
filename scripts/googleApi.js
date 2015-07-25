@@ -1,5 +1,3 @@
-//This is to communicate directly with google calendar Api.
-//https://www.googleapis.com/calendar/v3/calendars/calendarId/events
 'use strict';
 
 var Promise = require('bluebird');

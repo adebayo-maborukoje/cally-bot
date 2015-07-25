@@ -6,10 +6,10 @@ var Promise = require('bluebird');
 var path = require('path');
 var axios = require('axios');
 var fs = Promise.promisifyAll(require('fs'));
-var token = fs.readFileSync('token.txt').toString(); // this file does not exist at the moment
+//var token = fs.readFileSync('token.txt').toString(); // this file does not exist at the moment
+var token = '';
 var request = require('google-oauth-jwt').requestWithJWT();
 var googleAuth = Promise.promisifyAll(require('google-oauth-jwt'));
-
 
 var baseurl = 'https://www.googleapis.com/calendar/v3/calendars/',
   fellowsLeaveCalendarId = 'andela.co_8q5ndpq7vfikvmrinv0oladgd8@group.calendar.google.com',
@@ -25,15 +25,15 @@ axios.interceptors.request.use(function(config) {
 });
 
 //  Generates the Access token for the first time if Google returns an error;
-var get = function(path, params, i) {
+var get = function(pathname, params, i) {
   i = i || 3;
   if (i === 0) return Promise.reject('Token generation failed after 3 attempts');
-  return axios.get(baseurl + path, params).then(function(response) {
+  return axios.get(baseurl + pathname, params).then(function(response) {
     return response.data;
   }).catch(function(err) {
     if (err.status === 401) {
       return generateToken().then(function() {
-        return get(path, params, i--);
+        return get(pathname, params, i--);
       });
     } else {
       return err;
@@ -66,7 +66,7 @@ var getAllDates = function() {
   return get(fellowsLeaveCalendarId + '/events', {
     params: {
       alwaysIncludeEmail: true,
-      maxResults: 10
+      maxResults: 100
     }
   }).then(function(data) {
     console.log('data', data);
@@ -88,3 +88,13 @@ module.exports = {
   getAllDates: getAllDates,
   getNextBirthday: getNextBirthday
 };
+
+if (!module.parent) { // Only run when not included
+    get(fellowsLeaveCalendarId + '/events').then(function(data) {
+        console.log(data.items.map(function(item) {
+          return item.summary
+        }).join("\n"));
+    }).catch(function(err) {
+        console.log(err.data.error);
+    });
+}

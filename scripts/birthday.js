@@ -27,7 +27,7 @@ module.exports = function(robot) {
           })
         }).join("\n");
         robot.send({
-            room: '#general'
+            room: '#random', 
           }, message)
           // robot.send({room: 'adebayo.m'}, message)
 

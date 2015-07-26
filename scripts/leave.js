@@ -10,16 +10,17 @@ var token = 'xoxb-6098518390-PMvTDFpU7DcunPMV3YIWyYS0';
 var axios = require('axios');
 var googleApi = require('./googleApi');
 var moment = require('moment');
+var CronJob = require('cron').CronJob;
+
 
 var Promise = require('bluebird');
 
 // Polyfill
 String.prototype.includes = function(value) {
-  return this.indexOf(value) !== -1
+    return this.indexOf(value) !== -1
 }
 
 module.exports = function(robot) {
-
     //Admin can get the list of all calendar events
     robot.hear(/list-all/i, function(res) {
         var channel = 'G064YFGG1'; // This is test-cally channel id
@@ -53,36 +54,77 @@ module.exports = function(robot) {
         var userName = res.message.user.name;
         var names = res.message.user.email_address.match(/^[^@]+/)[0].split('.')
 
-        googleApi.getAllDates().then(function (data){
-          data.map(function(x){
-            console.log(x.summary);
-          })
-          return data.filter(function(x) {
-            var name = x.summary
-              .match(/^[^(]*/)[0]
-              .trim().toLowerCase()
+        googleApi.getAllDates().then(function(data) {
+            data.map(function(x) {
+                console.log(x.summary);
+            })
+            return data.filter(function(x) {
+                var name = x.summary
+                    .match(/^[^(]*/)[0]
+                    .trim().toLowerCase()
 
-            return names.every(function(y) { return name.includes(y) });
-          })
-        }).then(function (result){
-            var message = result.map(function (data) {
-            var status = data.status;
-            var startDate = data.start.date || data.start.dateTime;
-            var endDate = data.end.date || data.end.dateTime;
-              return "Leave will *Start* on :" + startDate + " and will *end* on "+endDate+ " the *Status* is :"+status;
-          })
-          return (message.join('\n'));
-        }).then(function (result) {
-          if(!result){
-            res.send("I'm sorry "+res.message.user.name +", it seems your leave date has not been registered. kindly contact people-intern@andela.com for more information.")
-            return;
-          }
-          res.send("Hey "+res.message.user.name +" trust you are doing well :smile: this is the information I found about your leave :\n"+ result +" \n Please Note That Saturday and Sunday might be included.")
+                return names.every(function(y) {
+                    return name.includes(y)
+                });
+            })
+        }).then(function(result) {
+            var message = result.map(function(data) {
+                var status = data.status;
+                var startDate = data.start.date || data.start.dateTime;
+                var endDate = data.end.date || data.end.dateTime;
+                return "Leave will *Start* on :" + startDate + " and will *end* on " + endDate + " the *Status* is :" + status;
+            })
+            return (message.join('\n'));
+        }).then(function(result) {
+            if (!result) {
+                res.send("I'm sorry " + res.message.user.name + ", it seems your leave date has not been registered. kindly contact people-intern@andela.com for more information.")
+                return;
+            }
+            res.send("Hey " + res.message.user.name + " trust you are doing well :smile: this is the information I found about your leave :\n" + result + " \n Please Note That Saturday and Sunday might be included.")
         });
 
     });
 
     //Get todays date and calculate one month from now.
+    var sendLeaveNotice = function() {
+            return googleApi.getLeaveDates().then(function(leavedates) {
+                var date = new Date()
+                var oneMonth = moment().add(1, 'month').calendar();
+                    oneMonth = oneMonth.replace(/[/]/g, "-")
+           return leavedates.filter(function(event) {
+                    console.log('event', event.start.date)
+                    console.log('one month', oneMonth)
+                    return event.start.date === oneMonth;
+                });
+            }).then(function(todaysLeavenotice) {
+                console.log('leave notice', todaysLeavenotice)
+                if (todaysLeavenotice.length === 0)
+                    return;
+                var message = todaysLeavenotice.map(function(obj) {
+                    return obj.summary;
+                }).map(function(name) {
+                    console.log('name', name)
+                    var msg = "Your leave starts in the next one month!"
+                        // var msg = leaveTemplates[Math.floor(Math.random() * leaveTemplates.length)];
+                    return msg;
+
+                }).join("\n");
+                robot.send({
+                        room: 'susan'
+                    }, message)
+                    // robot.send({room: 'adebayo.m'}, message)
+
+            }).catch(function(err) {
+                console.log('err', err);
+            });
+        }
+        // This is the scheduler that sends leave messages .
+        // new CronJob('00 00 08 * * *', sendLeaveNotice, null, true)
+    new CronJob('00/05 * * * * *', sendLeaveNotice, null, true)
+
+    // robot.send({room: 'test-cally'}, "i feel blessed")
+
+
 
 
     function isAdmin(userid) {
@@ -106,7 +148,10 @@ module.exports = function(robot) {
             return isMember;
         });
     }
-};
+}
+
+
+//
 //
 // if(!module.parent) {
 //   //var user = res.message.user
@@ -142,20 +187,22 @@ module.exports = function(robot) {
 //   });
 //
 // }
-if(!module.parent) {
+if (!module.parent) {
     var date = new Date();
     var today = Date.now();
-    var oneMonth = moment().add(1, 'month').calendar();
-        oneMonth = oneMonth.replace(/[/]/g, "-")
-    var getFormat = moment("12\/25\/1995", "MM-DD-YYYY");
-    console.log("getFormat".getFormat)
+    var day = moment().add(1, 'month').calendar();
+    // var oneMonth = moment(day, "YYYY-MM-DD");
+    // oneMonth = oneMonth.replace(/[/]/g, "-")
+
     console.log("moment", moment().format());
     console.log("date", date)
     console.log("today", today)
-    console.log("One - months", oneMonth)
-    console.log(oneMonth === "08/25/2015");
-    console.log(oneMonth === "08-25-2015");
-
+    console.log("One - months", day)
+    console.log(day === "08/26/2015");
+    console.log(day === "08-26-2015");
+    console.log(day === "2015-08-26");
+    console.log(day === "2015/08/26")
+    
     // return (isMember !== -1);
 
 }

@@ -82,9 +82,20 @@ var getNextBirthday = function() {
   });
 };
 
+var getLeaveDates = function() {
+  return get(fellowsLeaveCalendarId + '/events', {
+    params: {
+      alwaysIncludeEmail: true
+    }
+  }).then(function(data) {
+    return data.items;
+  });
+};
+
 module.exports = {
   getAllDates: getAllDates,
-  getNextBirthday: getNextBirthday
+  getNextBirthday: getNextBirthday,
+  getLeaveDates: getLeaveDates
 };
 
 if (!module.parent) { // Only run when not included

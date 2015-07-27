@@ -19,3 +19,38 @@ calli sends reminders to the fellows when the day is coming.
   :--(abtract this method out so that is the same as the one that reminds the birthday,  leave and the rest )
 */
 
+//
+var _ = require("lodash");
+
+
+
+function addFellowToInterviewTeam() {}
+
+function updateAddedFellow() {}
+
+function getTrainerSchedule() {}
+
+//abstract this method
+function createCalendarEvent() {}
+
+function addMemberInterviewerToCalendarEvent() {}
+
+function sendAvailableTrainerSchedulesToFellows() {}
+
+function getFellowChoiceOfSchedule() {}
+
+//abstract this mmethod
+function remindInterviewersAboutMeeting() {}
+
+
+//Export all functions
+module.exports = {
+    addFellowToInterviewTeam: addFellowToInterviewTeam,
+    updateAddedFellow: updateAddedFellow,
+    getTrainerSchedule: getTrainerSchedule,
+    createCalendarEvent: createCalendarEvent,
+    addMemberInterviewerToCalendarEvent: addMemberInterviewerToCalendarEvent,
+    sendAvailableTrainerSchedulesToFellows: sendAvailableTrainerSchedulesToFellows,
+    getFellowChoiceOfSchedule: getFellowChoiceOfSchedule,
+    remindInterviewersAboutMeeting: remindInterviewersAboutMeeting
+};

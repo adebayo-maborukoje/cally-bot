@@ -17,14 +17,29 @@ fellow chooses a slot and sends to calli
 calli uses the slot to create a calendar event for that fellow with that trainer
 calli sends reminders to the fellows when the day is coming. 
   :--(abtract this method out so that is the same as the one that reminds the birthday,  leave and the rest )
+{
+    email: 'chibuzor.obiora@andela.co/com",
+    slack_Id: "kjasfhdh",
+    trainer: {
+        email: "modupe@andela.com",
+        slack_Id: "jhfidfjid"
+    }
+}
+
+
 */
 
 //
-var _ = require("lodash");
+var _ = require('lodash');
+var db = require('./mongolab-connection');
 
 
 
-function addFellowToInterviewTeam() {}
+function addFellowToInterviewTeam() {
+
+}
+
+function deleteFellowFromInterviewTeam(){}
 
 function updateAddedFellow() {}
 
@@ -47,6 +62,7 @@ function remindInterviewersAboutMeeting() {}
 //Export all functions
 module.exports = {
     addFellowToInterviewTeam: addFellowToInterviewTeam,
+    deleteFellowFromInterviewTeam: deleteFellowFromInterviewTeam,
     updateAddedFellow: updateAddedFellow,
     getTrainerSchedule: getTrainerSchedule,
     createCalendarEvent: createCalendarEvent,

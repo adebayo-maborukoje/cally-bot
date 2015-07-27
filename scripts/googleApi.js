@@ -4,7 +4,6 @@ var Promise = require('bluebird');
 var path = require('path');
 var axios = require('axios');
 var fs = Promise.promisifyAll(require('fs'));
-//var token = fs.readFileSync('token.txt').toString(); // this file does not exist at the moment
 var token = '';
 var request = require('google-oauth-jwt').requestWithJWT();
 var googleAuth = Promise.promisifyAll(require('google-oauth-jwt'));
@@ -59,28 +58,32 @@ var generateToken = function() {
   });
 };
 
-//get the list of all leave dates
+//get the list of all leave dates Fellows and Staff.
 var getAllDates = function() {
-  return get(fellowsLeaveCalendarId + '/events', {
-    params: {
-      alwaysIncludeEmail: true,
-      maxResults: 100
-    }
-  }).then(function(data) {
-    console.log('data', data);
-    return data.items;
-  });
+    return Promise.all([
+      getCalendar(fellowsLeaveCalendarId),
+      getCalendar(staffLeaveCalendarId)
+    ]).spread(function(data1, data2) {
+      var all = data1.concat(data2)
+      return all;
+    })
 };
 
+// Get the List of Birthdays in the birthday Calendar.
 var getNextBirthday = function() {
-  return get(birthdayCalendarId + '/events', {
-    params: {
-      alwaysIncludeEmail: true
-    }
-  }).then(function(result) {
-    return result.items;
-  });
+    return getCalendar(birthdayCalendarId)
 };
+
+function getCalendar(calendarId, max) {
+  return get(calendarId + '/events', {
+    params: {
+      alwaysIncludeEmail: true,
+      maxResults: max || 100
+    }
+  }).then(function(data) {
+    return data.items;
+  });
+}
 
 var getLeaveDates = function() {
   return get(fellowsLeaveCalendarId + '/events', {
@@ -97,13 +100,3 @@ module.exports = {
   getNextBirthday: getNextBirthday,
   getLeaveDates: getLeaveDates
 };
-
-if (!module.parent) { // Only run when not included
-    get(fellowsLeaveCalendarId + '/events').then(function(data) {
-        console.log(data.items.map(function(item) {
-          return item.summary
-        }).join("\n"));
-    }).catch(function(err) {
-        console.log(err.data.error);
-    });
-}

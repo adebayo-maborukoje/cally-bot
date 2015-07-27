@@ -5,9 +5,7 @@
 // Admin can view all the leave available
 'use strict';
 var help = require('./help');
-var BaseUrl = 'https://slack.com/api/';
-var token = 'xoxb-6098518390-PMvTDFpU7DcunPMV3YIWyYS0';
-var axios = require('axios');
+var slackapi = require('./slackapi');
 var googleApi = require('./googleApi');
 var moment = require('moment');
 
@@ -23,11 +21,11 @@ module.exports = function(robot) {
     //Admin can get the list of all calendar events
     robot.hear(/list-all/i, function(res) {
         var channel = 'G064YFGG1'; // This is test-cally channel id
-        var isMemberPromise = belongsToGroup(channel, res.message.user.id).then(function(isMember) {
+        var isMemberPromise = slackapi.getGroup(channel, res.message.user.id).then(function(isMember) {
             return (isMember !== -1);
         });
 
-        var isAdminPromise = isAdmin(res.message.user.id);
+        var isAdminPromise = slackapi.getUserFromSlack(res.message.user.id);
         Promise.all([isMemberPromise, isAdminPromise]).spread(function(isMember, isAdmin) {
             if (isMember || isAdmin) {
                 return googleApi.getAllDates();
@@ -82,30 +80,6 @@ module.exports = function(robot) {
 
     });
 
-    //Get todays date and calculate one month from now.
-
-
-    function isAdmin(userid) {
-        //this is the admin user (sayo -- used in test case for admin users)
-        // userid = 'U03LJ0TRH';
-        return axios.get(BaseUrl + 'users.info?token=' + token + '&user=' + userid)
-            .then(function(response) {
-                var andela = response.data;
-                return andela.user.is_admin;
-            });
-    }
-
-    // this check is necessary in other to allow some non admin user also check the list
-    // However only users belonging to a particular private channel will be privy to it.
-
-    function belongsToGroup(channel, requester) {
-        // channel = 'G064YFGG1';
-        return axios.get(BaseUrl + 'groups.info?token=' + token + '&channel=' + channel).then(function(response) {
-            var slackGroupMembers = response.data.group.members;
-            var isMember = slackGroupMembers.indexOf(requester);
-            return isMember;
-        });
-    }
 };
 //
 // if(!module.parent) {

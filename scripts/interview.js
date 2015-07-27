@@ -33,11 +33,12 @@ function getTrainerSchedule() {}
 //abstract this method
 function createCalendarEvent() {}
 
-function addMemberInterviewerToCalendarEvent() {}
 
 function sendAvailableTrainerSchedulesToFellows() {}
 
 function getFellowChoiceOfSchedule() {}
+
+function addMemberInterviewerToCalendarEvent() {}
 
 //abstract this mmethod
 function remindInterviewersAboutMeeting() {}

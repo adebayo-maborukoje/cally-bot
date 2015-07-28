@@ -5,9 +5,7 @@
 // Admin can view all the leave available
 'use strict';
 var help = require('./help');
-var BaseUrl = 'https://slack.com/api/';
-var token = 'xoxb-6098518390-PMvTDFpU7DcunPMV3YIWyYS0';
-var axios = require('axios');
+var slackapi = require('./slackapi');
 var googleApi = require('./googleApi');
 var moment = require('moment');
 var CronJob = require('cron').CronJob;
@@ -24,11 +22,11 @@ module.exports = function(robot) {
     //Admin can get the list of all calendar events
     robot.hear(/list-all/i, function(res) {
         var channel = 'G064YFGG1'; // This is test-cally channel id
-        var isMemberPromise = belongsToGroup(channel, res.message.user.id).then(function(isMember) {
+        var isMemberPromise = slackapi.getGroup(channel, res.message.user.id).then(function(isMember) {
             return (isMember !== -1);
         });
 
-        var isAdminPromise = isAdmin(res.message.user.id);
+        var isAdminPromise = slackapi.getUserFromSlack(res.message.user.id);
         Promise.all([isMemberPromise, isAdminPromise]).spread(function(isMember, isAdmin) {
             if (isMember || isAdmin) {
                 return googleApi.getAllDates();
@@ -90,8 +88,8 @@ module.exports = function(robot) {
             return googleApi.getLeaveDates().then(function(leavedates) {
                 var date = new Date()
                 var oneMonth = moment().add(1, 'month').calendar();
-                    oneMonth = oneMonth.replace(/[/]/g, "-")
-           return leavedates.filter(function(event) {
+                oneMonth = oneMonth.replace(/[/]/g, "-")
+                return leavedates.filter(function(event) {
                     console.log('event', event.start.date)
                     console.log('one month', oneMonth)
                     return event.start.date === oneMonth;
@@ -121,37 +119,8 @@ module.exports = function(robot) {
         // This is the scheduler that sends leave messages .
         // new CronJob('00 00 08 * * *', sendLeaveNotice, null, true)
     new CronJob('00/05 * * * * *', sendLeaveNotice, null, true)
+};
 
-    // robot.send({room: 'test-cally'}, "i feel blessed")
-
-
-
-
-    function isAdmin(userid) {
-        //this is the admin user (sayo -- used in test case for admin users)
-        // userid = 'U03LJ0TRH';
-        return axios.get(BaseUrl + 'users.info?token=' + token + '&user=' + userid)
-            .then(function(response) {
-                var andela = response.data;
-                return andela.user.is_admin;
-            });
-    }
-
-    // this check is necessary in other to allow some non admin user also check the list
-    // However only users belonging to a particular private channel will be privy to it.
-
-    function belongsToGroup(channel, requester) {
-        // channel = 'G064YFGG1';
-        return axios.get(BaseUrl + 'groups.info?token=' + token + '&channel=' + channel).then(function(response) {
-            var slackGroupMembers = response.data.group.members;
-            var isMember = slackGroupMembers.indexOf(requester);
-            return isMember;
-        });
-    }
-}
-
-
-//
 //
 // if(!module.parent) {
 //   //var user = res.message.user
@@ -202,7 +171,7 @@ if (!module.parent) {
     console.log(day === "08-26-2015");
     console.log(day === "2015-08-26");
     console.log(day === "2015/08/26")
-    
+
     // return (isMember !== -1);
 
 }

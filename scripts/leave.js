@@ -9,7 +9,6 @@ var slackapi = require('./slackapi');
 var googleApi = require('./googleApi');
 var moment = require('moment');
 var CronJob = require('cron').CronJob;
-
 var Promise = require('bluebird');
 
 // Polyfill in other to use includes.
@@ -123,7 +122,6 @@ module.exports = function(robot) {
 
     // This checks if the requester is and admin on slack.
     function isAdmin(userid) {
-        //this is the admin user (sayo -- used in test case for admin users)
         return axios.get(BaseUrl + 'users.info?token=' + token + '&user=' + userid)
             .then(function(response) {
                 var andela = response.data;
@@ -134,7 +132,6 @@ module.exports = function(robot) {
     // This check is necessary in other to allow some non admin user also check the list
     // However only users belonging to a particular private channel will be privy to it.
     function belongsToGroup(channel, requester) {
-        // channel = 'G064YFGG1';
         return axios.get(BaseUrl + 'groups.info?token=' + token + '&channel=' + channel).then(function(response) {
             var slackGroupMembers = response.data.group.members;
             var isMember = slackGroupMembers.indexOf(requester);

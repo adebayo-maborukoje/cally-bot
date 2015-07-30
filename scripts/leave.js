@@ -109,13 +109,13 @@ module.exports = function(robot) {
 
   });
   //Get todays date and calculate one month from now.
-  var sendLeaveNotice = function() {
-    var oneMonth = moment().add('1', 'months').format('YYYY-MM-DD');
+  var sendLeaveNotice = function(dateToQuery) {
     var namesPromise = googleApi.getAllDates().then(function(leavedates) {
       return leavedates.filter(function(event) {
-        return event.start.date === oneMonth;
+        return event.start.date === dateToQuery;
       });
     }).then(function(todaysLeavenotice) {
+
       return todaysLeavenotice.map(function(obj) {
         var name = obj.summary
           .match(/^[^(]*/)[0]
@@ -123,29 +123,48 @@ module.exports = function(robot) {
         return name.replace(' ', '.');
       })
     })
-    var slackusersPromise = slackApi.getAllSlackMembers()
+    var slackusersPromise = slackApi.getAllSlackMembers().then(function(slackusers) {
+      return slackusers.map(function(x) {
+        return [
+          x.email.match(/^[^@]+/)[0],
+          x.name,
+          x.real_name,
+          x.real_name.toLowerCase().replace(' ', '.'),
+        ]
+      })
+    })
 
-    Promise.all([namesPromise, slackusersPromise]).spread(function(ids, slackusers) {
-        var idToRoomNames = slackusers.map(function(x) {
-          return [
-            x.email.match(/^[^@]+/)[0],
-            x.name
-          ]
-        })
+    Promise.all([namesPromise, slackusersPromise]).spread(function(ids, idToRoomNames) {
+        // :: id -> userName
+        var weirdNames = {
+          'ijeoma.arisah': ['', 'jay', 'Jay']
+        }
 
-        return ids.map(function(id) {
-          return idToRoomNames.find(function(idWithRoomName) {
-            return id === idWithRoomName[0];
+        ids.map(function(id) {
+          if(weirdNames[id]) return weirdNames[id]
+
+          var revid = id.split('.').reverse().join('.')
+          var y = idToRoomNames.find(function(idWithRoomName) {
+            var currid = idWithRoomName[0]
+            var curridbackup = idWithRoomName[3]
+
+            return id === currid || revid === currid
+                     || id === curridbackup || revid === curridbackup
+                     || levenshteinDistance(id, currid) < 3
           })
-        }).filter(function(x) {
+          if(y === undefined) {
+            // Notify Adebayo with id
+          }
+          return y
+        })
+        .filter(function(x) {
           return x !== undefined
-        }).map(function(x) {
+        })
+        .map(function(x) {
           return x[1]
         })
-
-      }).then(function(roomNames) {
-        roomNames.forEach(function(name) {
-          var msg = "Hey " + name + ", your leave will be starting in a month, " + getDayOfTheWeek(oneMonth) + ", tidy up your desk and inform your clients and enjoy your break. :smile:";
+        .forEach(function(name) {
+          var msg = "Hey " + name + ", your leave will be starting in a month, " + getDayOfTheWeek(dateToQuery) + ", tidy up your desk and inform your clients and enjoy your break. :smile:";
           robot.emit('slack-attachment', {
             content: {
               fallback: msg,
@@ -153,19 +172,65 @@ module.exports = function(robot) {
               text: msg,
               color: '#7CD197'
             },
-            channel: name
+            // channel: name
+              channel: 'adebayo.m'
           });
         })
       })
       .catch(function(err) {
-        console.log('err', err);
+        console.log('err', err.stack);
       });
   }
 
-  // This is the scheduler that sends leave messages to User by 11 am daily.
-  new CronJob('00 00 11 * * *', sendLeaveNotice, null, true)
+  //var oneMonth = moment().add({months: 1}).format('YYYY-MM-DD');
+  //var oneMonth = ;
+
+  function createJob(deltaTime) {
+    return function g() {
+      var time = moment().add(deltaTime)
+      sendLeaveNotice(time)
+    }
+  }
+
+  sendLeaveNotice("2015-12-21")
+  //new CronJob('00 00 11 * * *', createJob({months: 1}) , null, true)
+  //new CronJob('00 00 11 * * *', createJob({weeks: 2}) , null, true)
 };
 
 function getDayOfTheWeek(day) {
   return moment(day).format("dddd Do of MMMM");
+}
+
+function levenshteinDistance(a, b) {
+  if(a.length === 0) return b.length;
+  if(b.length === 0) return a.length;
+
+  var matrix = [];
+
+  // increment along the first column of each row
+  var i;
+  for(i = 0; i <= b.length; i++){
+    matrix[i] = [i];
+  }
+
+  // increment each column in the first row
+  var j;
+  for(j = 0; j <= a.length; j++){
+    matrix[0][j] = j;
+  }
+
+  // Fill in the rest of the matrix
+  for(i = 1; i <= b.length; i++){
+    for(j = 1; j <= a.length; j++){
+      if(b.charAt(i-1) === a.charAt(j-1)){
+        matrix[i][j] = matrix[i-1][j-1];
+      } else {
+        matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, // substitution
+                                Math.min(matrix[i][j-1] + 1, // insertion
+                                         matrix[i-1][j] + 1)); // deletion
+      }
+    }
+  }
+
+  return matrix[b.length][a.length];
 }

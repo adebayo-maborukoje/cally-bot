@@ -29,6 +29,8 @@ function getAllSlackMembers() {
         var b = {
           id: activeMembers.id,
           name: activeMembers.name,
+          real_name: activeMembers.profile.real_name,
+          real_name_normalised: activeMembers.profile.real_name_normalized,
           email: activeMembers.profile.email
         }
 

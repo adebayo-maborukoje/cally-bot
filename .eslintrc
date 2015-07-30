@@ -15,6 +15,9 @@ rules:
   space-infix-ops: 0
   no-use-before-define: 0
   no-extend-native: 0
+  comma-spacing: 0
+  no-new: 0
+  no-mixed-spaces-and-tabs: 0
 
   no-multi-spaces: 1
   no-constant-condition: 0

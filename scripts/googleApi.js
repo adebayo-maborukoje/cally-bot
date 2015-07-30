@@ -63,8 +63,8 @@ var getAllDates = function() {
     return Promise.all([
       getCalendar(fellowsLeaveCalendarId),
       getCalendar(staffLeaveCalendarId)
-    ]).spread(function(data1, data2) {
-      var all = data1.concat(data2)
+    ]).spread(function(fellowData, staffData) {
+      var all = fellowData.concat(staffData)
       return all;
     })
 };
@@ -85,18 +85,7 @@ function getCalendar(calendarId, max) {
   });
 }
 
-var getLeaveDates = function() {
-  return get(fellowsLeaveCalendarId + '/events', {
-    params: {
-      alwaysIncludeEmail: true
-    }
-  }).then(function(data) {
-    return data.items;
-  });
-};
-
 module.exports = {
   getAllDates: getAllDates,
-  getNextBirthday: getNextBirthday,
-  getLeaveDates: getLeaveDates
+  getNextBirthday: getNextBirthday
 };

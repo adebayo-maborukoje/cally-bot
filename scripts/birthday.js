@@ -27,9 +27,8 @@ module.exports = function(robot) {
           })
         }).join("\n");
         robot.send({
-            room: '#random', 
+            room: '#random',
           }, message)
-          // robot.send({room: 'adebayo.m'}, message)
 
       }).catch(function(err) {
         console.log('err', err);
@@ -37,7 +36,7 @@ module.exports = function(robot) {
     }
     // This is the scheduler that sends Birthday messages every 8 am of the day whenever there is a Birthday.
   new CronJob('00 00 08 * * *', sendBirthdays, null, true);
-  // robot.send({room: 'test-cally'}, "i feel blessed")
+
 };
 
 // this is to append 0 to dates that are single digit

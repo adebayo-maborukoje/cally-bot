@@ -13,9 +13,10 @@ var Promise = require('bluebird');
 
 // Polyfill in other to use includes.
 String.prototype.includes = function(value) {
-  return this.indexOf(value) !== -1
-}
+  return this.indexOf(value) !== -1;
+};
 
+//Polyfilling Array .find
 if (!Array.prototype.find) {
   Array.prototype.find = function(predicate) {
     if (this == null) {
@@ -55,17 +56,18 @@ module.exports = function(robot) {
       }
     }).then(function(dates) {
       var messages = dates.map(function(date) {
-        var name = date.summary.match(/^[^(]*/)[0]
+        var name = date.summary.match(/^[^(]*/)[0];
         var status = date.status;
         var startDates = date.start.date || date.start.dateTime;
         var endDate = date.end.date || date.end.dateTime;
-        return "```" + name + ' - from ' + getDayOfTheWeek(startDates) + ' - to ' + getDayOfTheWeek(endDate) + ' - ' + status + "```";
+        return '```' + name + ' - from ' + getDayOfTheWeek(startDates) + ' - to ' + getDayOfTheWeek(endDate) + ' - ' + status + '```';
       });
       res.send(messages.join('\n'));
     }).catch(function(err) {
       console.log('Error', err.stack);
     });
   });
+
 
   // get single user leave date
   // a Single user can check his/her own leave date
@@ -76,10 +78,10 @@ module.exports = function(robot) {
       return data.filter(function(x) {
         var name = x.summary
           .match(/^[^(]*/)[0]
-          .trim().toLowerCase()
+          .trim().toLowerCase();
 
         return names.every(function(y) {
-          return name.includes(y)
+          return name.includes(y);
         });
       })
     }).then(function(result) {
@@ -108,9 +110,11 @@ module.exports = function(robot) {
     });
 
   });
+
   //Get todays date and calculate one month from now.
-  var sendLeaveNotice = function(dateToQuery) {
+  var sendLeaveNotice = function(dateToQuery, duration) {
     var namesPromise = googleApi.getAllDates().then(function(leavedates) {
+
       return leavedates.filter(function(event) {
         return event.start.date === dateToQuery;
       });
@@ -121,8 +125,8 @@ module.exports = function(robot) {
           .match(/^[^(]*/)[0]
           .trim().toLowerCase();
         return name.replace(' ', '.');
-      })
-    })
+      });
+    });
     var slackusersPromise = slackApi.getAllSlackMembers().then(function(slackusers) {
       return slackusers.map(function(x) {
         return [
@@ -130,104 +134,117 @@ module.exports = function(robot) {
           x.name,
           x.real_name,
           x.real_name.toLowerCase().replace(' ', '.'),
-        ]
-      })
-    })
+        ];
+      });
+    });
 
     Promise.all([namesPromise, slackusersPromise]).spread(function(ids, idToRoomNames) {
-        // :: id -> userName
         var weirdNames = {
           'ijeoma.arisah': ['', 'jay', 'Jay']
-        }
-
+        };
         ids.map(function(id) {
-          if(weirdNames[id]) return weirdNames[id]
+            if (weirdNames[id]) return weirdNames[id];
+            var revid = id.split('.').reverse().join('.');
+            var y = idToRoomNames.find(function(idWithRoomName) {
+              var currid = idWithRoomName[0];
+              var curridbackup = idWithRoomName[3];
 
-          var revid = id.split('.').reverse().join('.')
-          var y = idToRoomNames.find(function(idWithRoomName) {
-            var currid = idWithRoomName[0]
-            var curridbackup = idWithRoomName[3]
-
-            return id === currid || revid === currid
-                     || id === curridbackup || revid === curridbackup
-                     || levenshteinDistance(id, currid) < 3
+              return id === currid || revid === currid || id === curridbackup || revid === curridbackup || levenshteinDistance(id, currid) < 3;
+            });
+            if (y === undefined) {
+              console.log(y)
+              //   var msg = y + " could not be found in the database it could be a wrong spelling. kindly check the user information"
+              // robot.send({
+              //   room: 'i-cally-bot'
+              // }, msg )
+            }
+            return y;
           })
-          if(y === undefined) {
-            // Notify Adebayo with id
-          }
-          return y
-        })
-        .filter(function(x) {
-          return x !== undefined
-        })
-        .map(function(x) {
-          return x[1]
-        })
-        .forEach(function(name) {
-          var msg = "Hey " + name + ", your leave will be starting in a month, " + getDayOfTheWeek(dateToQuery) + ", tidy up your desk and inform your clients and enjoy your break. :smile:";
-          robot.emit('slack-attachment', {
-            content: {
-              fallback: msg,
-              pretext: "Personal Holiday Information",
-              text: msg,
-              color: '#7CD197'
-            },
-            // channel: name
-              channel: 'adebayo.m'
+          .filter(function(x) {
+            return x !== undefined;
+          })
+          .map(function(x) {
+            return x[1];
+          })
+          .forEach(function(name) {
+            var msg = "Hey " + name + ", your leave is coming up on " + duration + " from now, " + getDayOfTheWeek(dateToQuery) + ", If you haven’t, please inform your client/trainer/line manager of your upcoming leave. Upon approval, forward to people-intern@andela.com. Thank you. :smile:";
+            robot.emit('slack-attachment', {
+              content: {
+                fallback: msg,
+                pretext: "Personal Holiday Information",
+                text: msg,
+                color: '#7CD197'
+              },
+              channel: name
+              // channel: "adebayo.m"
+            });
           });
-        })
       })
       .catch(function(err) {
         console.log('err', err.stack);
       });
-  }
+  };
 
-  //var oneMonth = moment().add({months: 1}).format('YYYY-MM-DD');
-  //var oneMonth = ;
-
-  function createJob(deltaTime) {
+  /*
+   * a wrapper function for the cron jobs
+   * @param ({}, string)
+   * Output : calls another function
+   */
+  function createJob(deltaTime, duration) {
     return function g() {
-      var time = moment().add(deltaTime)
-      sendLeaveNotice(time)
-    }
+      var time = moment().add(deltaTime).format('YYYY-MM-DD');
+      sendLeaveNotice(time, duration);
+    };
   }
 
-  sendLeaveNotice("2015-12-21")
-  //new CronJob('00 00 11 * * *', createJob({months: 1}) , null, true)
-  //new CronJob('00 00 11 * * *', createJob({weeks: 2}) , null, true)
+  new CronJob('00 00 11 * * *', createJob({months: 1}, "One Month"), null, true);
+  new CronJob('00 30 11 * * *', createJob({weeks: 2}, "2 weeks"), null, true);
+  // new CronJob('00 30 10 * * *', createJob({days: 3}, "3 days"), null, true);
+
 };
 
+/*
+ * returns a formated year from the
+ * @param (2015-08-20)
+ * Output : Saturday, 20th Day of August
+ */
 function getDayOfTheWeek(day) {
   return moment(day).format("dddd Do of MMMM");
 }
 
+/*
+ * returns the username if the spell check difference is just less than two
+ * @input (two items to compare)
+ * Output : returns boolean;
+ */
+
 function levenshteinDistance(a, b) {
-  if(a.length === 0) return b.length;
-  if(b.length === 0) return a.length;
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
 
   var matrix = [];
 
   // increment along the first column of each row
   var i;
-  for(i = 0; i <= b.length; i++){
+  for (i = 0; i <= b.length; i++) {
     matrix[i] = [i];
   }
 
   // increment each column in the first row
   var j;
-  for(j = 0; j <= a.length; j++){
+  for (j = 0; j <= a.length; j++) {
     matrix[0][j] = j;
   }
 
   // Fill in the rest of the matrix
-  for(i = 1; i <= b.length; i++){
-    for(j = 1; j <= a.length; j++){
-      if(b.charAt(i-1) === a.charAt(j-1)){
-        matrix[i][j] = matrix[i-1][j-1];
+  for (i = 1; i <= b.length; i++) {
+    for (j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
       } else {
-        matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, // substitution
-                                Math.min(matrix[i][j-1] + 1, // insertion
-                                         matrix[i-1][j] + 1)); // deletion
+        matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, // substitution
+          Math.min(matrix[i][j - 1] + 1, // insertion
+            matrix[i - 1][j] + 1)); // deletion
       }
     }
   }

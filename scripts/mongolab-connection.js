@@ -1,12 +1,12 @@
-var mongoose = require('mongoose');
+// var mongoose = require('mongoose');
 
 
-var db = {
-    localUrl: 'mongodb://localhost/cally-bot'
-};
+// var db = {
+//     localUrl: 'mongodb://localhost/cally-bot'
+// };
 
-mongoose.connect(db.localUrl || db.MONGOLAB_URI);
+// mongoose.connect(db.localUrl || db.MONGOLAB_URI);
 
-var port = process.env.PORT || 8080;
+// var port = process.env.PORT || 8080;
 
-mongoose.connect(db.url);
+// mongoose.connect(db.url);

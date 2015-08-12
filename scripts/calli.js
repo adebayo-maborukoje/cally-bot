@@ -6,9 +6,6 @@ var interview = require('./interview');
 module.exports = function(robot) {
     /**INTERVIEW**/
     robot.respond(/add: (.*)/, function() {
-            interview.addFellowToInterviewTeam(fellow);
-
-        }
-    }
-
+        interview.addFellowToInterviewTeam(fellow);
+    });
 };

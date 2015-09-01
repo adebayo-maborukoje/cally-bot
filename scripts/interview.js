@@ -9,13 +9,13 @@ Book a date. (abstract this function for everyone) from slack
 
 
 fellow completes training and joins interview-team 
-admin adds fellow by slack handles to the cali-interview array. 
+admin adds fellow by slack handles to the cally-interview array. 
 fellow gets message from cally telling her that she has been added to the interview - team
    and would be getting notoifications for such
 next up is the fellow gets a notification from the for the list of available dates [mapped to a string(TRAINER/SLOT)]
-fellow chooses a slot and sends to calli
-calli uses the slot to create a calendar event for that fellow with that trainer
-calli sends reminders to the fellows when the day is coming. 
+fellow chooses a slot and sends to cally
+cally uses the slot to create a calendar event for that fellow with that trainer
+cally sends reminders to the fellows when the day is coming. 
   :--(abtract this method out so that is the same as the one that reminds the birthday,  leave and the rest )
 {
     email: 'chibuzor.obiora@andela.co/com",
@@ -33,13 +33,11 @@ calli sends reminders to the fellows when the day is coming.
 var _ = require('lodash');
 var db = require('./mongolab-connection');
 
-
-
 function addFellowToInterviewTeam() {
 
 }
 
-function deleteFellowFromInterviewTeam(){}
+function deleteFellowFromInterviewTeam() {}
 
 function updateAddedFellow() {}
 
@@ -55,7 +53,7 @@ function getFellowChoiceOfSchedule() {}
 
 function addMemberInterviewerToCalendarEvent() {}
 
-//abstract this mmethod
+//abstract this mmethod 
 function remindInterviewersAboutMeeting() {}
 
 

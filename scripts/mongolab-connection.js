@@ -1,12 +1,6 @@
-// var mongoose = require('mongoose');
+var mongoose = require('mongoose');
+mongoose.connect(process.env.PROD_MONGODB || 'mongodb://localhost/cally-bot');
 
+var db = mongoose.connection;
 
-// var db = {
-//     localUrl: 'mongodb://localhost/cally-bot'
-// };
-
-// mongoose.connect(db.localUrl || db.MONGOLAB_URI);
-
-// var port = process.env.PORT || 8080;
-
-// mongoose.connect(db.url);
+module.exports = db;

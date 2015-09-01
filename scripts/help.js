@@ -3,6 +3,3 @@ module.exports = [
     '`list-all` - *(Admin Only)* This will list all the yet to be taken leave days for the fellows and staff.',
     '`show` - Will show your scheduled leave days'
 ];
-
-
-

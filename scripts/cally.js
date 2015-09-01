@@ -1,8 +1,5 @@
-// REQUIRE ALL THE OTHER FILES
-// CORE LOGIC FOR THE APP
 var interview = require('./interview');
 var help = require('./help');
-
 
 module.exports = function(robot) {
 
@@ -12,16 +9,18 @@ module.exports = function(robot) {
         res.send(emit);
     });
 
-    robot.respond(/hi Cally || hi/i, function(res) {
-        var response = 'Hi ' + res.message.user.name + ', My name is Cally and I am here to' +
-                        'remind you when your leave will start and other important dates.';
+    robot.respond(/Cally/i, function(res) {
+        var response = 'Hi ' + res.message.user.name + ', My name is Cally and I am here to ' +
+            'remind you when your leave will start and other important dates.';
         res.send(response);
     });
 
+    robot.respond(/add: (.*)/, function(res) {
+        console.log('default', res);
+        var response = 'Hi ' + res.match[1];
+        var slack_id = res.match[1];
+        interview.addFellowToInterviewTeam(slack_id);
 
-
-    /**INTERVIEW**/
-    // robot.respond(/add: (.*)/, function() {
-    //     interview.addFellowToInterviewTeam(fellow);
-    // });
+        res.send(response);
+    });
 };

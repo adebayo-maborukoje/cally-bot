@@ -7,7 +7,6 @@ gulp.task('cally', function() {
 });
 
 
-//copied Ladi's post on slack in case we might need it later on
 gulp.task('keep-alive', function () {
   var env = process.env.NODE_ENV || 'development';
 

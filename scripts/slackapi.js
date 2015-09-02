@@ -2,6 +2,7 @@ var url = 'https://slack.com/api/';
 var token = 'xoxb-6098518390-PMvTDFpU7DcunPMV3YIWyYS0';
 var axios = require('axios');
 
+
 var exports = module.exports = {};
 
 exports.getUserFromSlack = function(userid) {
@@ -21,7 +22,7 @@ exports.getGroup = function(channel, requester) {
         });
 };
 
-var getAllSlackMembers = function() {
+exports.getAllSlackMembers = function() {
     return axios.get(url + 'users.list?token=' + token)
         .then(function(response) {
             var allMembers = response.data.members;
@@ -43,5 +44,3 @@ var getAllSlackMembers = function() {
             return result;
         });
 };
-
-getAllSlackMembers();

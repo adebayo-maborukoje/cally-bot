@@ -5,10 +5,7 @@ var slackApi = require('./slackapi');
 var exports = module.exports = {};
 
 
-exports.addFellowToInterviewTeam = function(slack_Id) {
-    var user = slackApi.getUserFromSlack(slack_Id);
-    console.log('addFellowToInterviewTeam', user);
-};
+exports.addFellowToInterviewTeam = function() {};
 
 exports.deleteFellowFromInterviewTeam = function() {};
 
@@ -28,4 +25,3 @@ exports.addMemberInterviewerToCalendarEvent = function() {};
 
 //abstract this mmethod 
 exports.remindInterviewersAboutMeeting = function() {};
-

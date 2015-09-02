@@ -1,4 +1,5 @@
 var interview = require('./interview');
+var userdb = require('./userdb');
 var help = require('./help');
 
 module.exports = function(robot) {
@@ -16,11 +17,13 @@ module.exports = function(robot) {
     });
 
     robot.respond(/add: (.*)/, function(res) {
-        console.log('default', res);
         var response = 'Hi ' + res.match[1];
         var slack_id = res.match[1];
-        interview.addFellowToInterviewTeam(slack_id);
-
         res.send(response);
+    });
+
+    robot.respond(/update/i, function(res) {
+        userdb.update();
+        res.send("updating...");
     });
 };

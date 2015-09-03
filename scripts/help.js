@@ -1,12 +1,5 @@
-'use strict';
-var help = require('./help');
-
-// module.exports = function(robot) {
-//   robot.respond(/hi Cally || hi/i, function (res) {
-//     res.send('Hi '+ res.message.user.name +', My name is Cally and I am here to remind you when your leave will start and other important dates.');
-//     // console.log(res);
-//   });
-//   // robot.respond(/help/i, function (res){
-//   //   res.send(help.join);
-//   // });
-// };
+module.exports = [
+    '`cally` - Introduces you to Cally, the calendar bot. Please type `help` to know more about how to operate Cally. ',
+    '`list-all` - *(Admin Only)* This will list all the yet to be taken leave days for the fellows and staff.',
+    '`show` - Will show your scheduled leave days'
+];

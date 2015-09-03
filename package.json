@@ -1,36 +1,41 @@
 {
-    "name": "callyBot",
-    "version": "0.0.0",
-    "private": true,
-    "author": "leaf-Bot Team",
-    "description": "A Bot that reminds fellows of their leave start date and keeps others in tune with their schedules. simply call -- your calender companion.",
-    "dependencies": {
-        "axios": "^0.5.4",
-        "bluebird": "^2.9.33",
-        "cron": "^1.0.9",
-        "google-oauth-jwt": "^0.1.6",
-        "gulp": "^3.9.0",
-        "gulp-nodemon": "^2.0.3",
-        "hogan.js": "^3.0.2",
-        "hubot": "^2.13.0",
-        "hubot-diagnostics": "0.0.1",
-        "hubot-google-images": "^0.1.5",
-        "hubot-google-translate": "^0.2.0",
-        "hubot-help": "^0.1.1",
-        "hubot-heroku-keepalive": "0.0.4",
-        "hubot-maps": "0.0.2",
-        "hubot-pugme": "^0.1.0",
-        "hubot-redis-brain": "0.0.3",
-        "hubot-rules": "^0.1.1",
-        "hubot-scripts": "^2.16.0",
-        "hubot-shipit": "^0.2.0",
-        "hubot-slack": "^3.3.0",
-        "jsonwebtoken": "^5.0.1",
-        "moment": "^2.10.3",
-        "needle": "^0.9.2",
-        "shelljs": "^0.5.1"
-    },
-    "engines": {
-        "node": "0.10.x"
-    }
+  "name": "callyBot",
+  "version": "0.0.0",
+  "private": true,
+  "author": "leaf-Bot Team",
+  "description": "A Bot that reminds fellows of their leave start date and keeps others in tune with their schedules. simply call -- your calender companion.",
+  "dependencies": {
+    "axios": "^0.5.4",
+    "bluebird": "^2.9.33",
+    "cron": "^1.0.9",
+    "google-oauth-jwt": "^0.1.6",
+    "gulp": "^3.9.0",
+    "gulp-nodemon": "^2.0.3",
+    "hogan.js": "^3.0.2",
+    "hubot": "^2.13.0",
+    "hubot-diagnostics": "0.0.1",
+    "hubot-google-images": "^0.1.5",
+    "hubot-google-translate": "^0.2.0",
+    "hubot-help": "^0.1.1",
+    "hubot-heroku-keepalive": "0.0.4",
+    "hubot-maps": "0.0.2",
+    "hubot-pugme": "^0.1.0",
+    "hubot-redis-brain": "0.0.3",
+    "hubot-rules": "^0.1.1",
+    "hubot-scripts": "^2.16.0",
+    "hubot-shipit": "^0.2.0",
+    "hubot-slack": "^3.3.0",
+    "i": "^0.3.3",
+    "jsonwebtoken": "^5.0.1",
+    "lodash": "^3.10.0",
+    "moment": "^2.10.3",
+    "needle": "^0.9.2",
+    "shelljs": "^0.5.1"
+  },
+  "engines": {
+    "node": "0.10.x"
+  },
+  "devDependencies": {
+    "mongoose": "^4.1.0"
+  }
 }

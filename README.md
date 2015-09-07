@@ -19,7 +19,7 @@ In this sequence `curl -H "Authorization: Bearer <GENERATED-TOKEN>" <CALENDAR_ID
 
 ###Files 
 cally-bot/
-* scripts/token.js : code that generates token on `leave` command currently *
+* scripts/token.js : code that generates token on `leave` command currently 
 * scripts/cally.js : code that will house logic for calling file functions and using their responses
 * scripts/interview.js : code that will house core logic for the interview aspect of cally
 * scripts/leave.js : code that will house core logic for the calendar aspect of cally
@@ -32,35 +32,9 @@ cally-bot/
 
 I followed this [article](https://github.com/extrabacon/google-oauth-jwt) to achieve the most of the above.
 
-##  Persistence
-
-If you are going to use the `hubot-redis-brain` package (strongly suggested),
-you will need to add the Redis to Go addon on Heroku which requires a verified
-account or you can create an account at [Redis to Go][redistogo] and manually
-set the `REDISTOGO_URL` variable.
-
-    % heroku config:add REDISTOGO_URL="..."
-
-If you don't need any persistence feel free to remove the `hubot-redis-brain`
-from `external-scripts.json` and you don't need to worry about redis at all.
-
-[redistogo]: https://redistogo.com/
+## Persistence
 
 ## Deployment
 
-    % heroku create --stack cedar
-    % git push heroku master
-
-If your Heroku account has been verified you can run the following to enable
-and add the Redis to Go addon to your app.
-
-    % heroku addons:add redistogo:nano
-
-If you run into any problems, checkout Heroku's [docs][heroku-node-docs].
-
-You'll need to edit the `Procfile` to set the name of your hubot.
-
-More detailed documentation can be found on the [deploying hubot onto
-Heroku][deploy-heroku] wiki page.
 
 

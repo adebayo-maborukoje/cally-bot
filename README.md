@@ -18,16 +18,20 @@ In this sequence `curl -H "Authorization: Bearer <GENERATED-TOKEN>" <CALENDAR_ID
 *Make sure to update the help.js module.exports array with the commad syntax and short description of what it does. 
 
 ###Files 
-cally-bot/
-* scripts/token.js : code that generates token on `leave` command currently 
-* scripts/cally.js : code that will house logic for calling file functions and using their responses
-* scripts/interview.js : code that will house core logic for the interview aspect of cally
-* scripts/leave.js : code that will house core logic for the calendar aspect of cally
-* scripts/help.js : code for cally's listener commands
-* gulpfile.js : our tasks
-* cally-bot/shell.js : code that contains script for running hubot on command line. It is required in the gulpfile 
-* my-key-file.pem : contains the private key that is generated from the developer account. 
-* token.txt : contains the token called recieved from google. 
+### Files 
+##### cally-bot/
+* scripts/birthday.js               : logic for birthday aspect of cally
+* scripts/birthdayMessages.json     : template birthday messages stored
+* scripts/cally.js                  : core logic for calling file functions and using their responses
+* scripts/googleApi.js              : logic for goolgle api requests
+* scripts/help.js                   : display of all cally's listener commands
+* scripts/interview.js              : logic for interview aspect of cally
+* scripts/leave.js                  : logic for leave aspect of cally
+* scripts/mongolab-connection.js    : setup for the mongolab connection and local developement
+* scripts/slackapi.js               : logic for slack api requests
+* scripts/userdb.js                 : logic for operations on users in database
+* gulpfile.js                       : automated tasks
+* shell.js                          : essential script for running hubot. required in the gulpfile 
 
 
 I followed this [article](https://github.com/extrabacon/google-oauth-jwt) to achieve the most of the above.

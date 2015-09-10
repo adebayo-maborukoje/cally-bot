@@ -10,27 +10,25 @@ var Schema = mongoose.Schema,
 var SlackUser = new Schema({
     author: ObjectId,
     slackId: String,
-    name: String,
     email: String,
-    realName: String,
-    realNameNormalised: String,
+    eventArray: [],
+    totalNumberBooked: Number,
+    numberTaken: Number
 });
 var SlackUser = mongoose.model('SlackUser', SlackUser);
 
-exports.update = function() {
+exports.update = function(res) {
     slackapi.getAllSlackMembers().then(function(results) {
-        
+
         SlackUser.collection.remove();
         results.map(function(n) {
             var user = new SlackUser();
             user.slackId = n.id;
-            user.name = n.name;
             user.email = n.email;
-            user.realName = n.real_name;
-            user.realNameNormalised = n.real_name_normalised;
             return user.save();
         });
+        res.send("Done updating");
     });
 };
 
-// create hashmap with all of this and export that. slack handle and slack_id
+exports.SlackUser = SlackUser;

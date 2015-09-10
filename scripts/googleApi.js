@@ -84,3 +84,15 @@ function getCalendar(calendarId, max) {
         return data.items;
     });
 }
+
+exports.listFellowEvents = function(eventId, res) {
+    return get(fellowsLeaveCalendarId + '/events/' + eventId, {
+        params: {
+            alwaysIncludeEmail: true,
+            maxAttendees: 3
+        }
+    }).then(function(data) {
+        res.send('text');
+        return data.items;
+    });
+};

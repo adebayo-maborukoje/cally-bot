@@ -18,6 +18,7 @@ var SlackUser = mongoose.model('SlackUser', SlackUser);
 
 
 exports.update = function(res) {
+    res.send("Updating the database...")
     slackapi.getAllSlackMembers().then(function(results) {
 
         SlackUser.collection.remove();
@@ -29,7 +30,7 @@ exports.update = function(res) {
             user.realName = n.real_name_normalised;
             return user.save();
         });
-        res.send("Done updating");
+        res.send("Done!");
     });
 };
 

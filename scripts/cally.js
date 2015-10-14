@@ -80,7 +80,9 @@ module.exports = function(robot) {
      */
 
     robot.respond(/update/i, function(res) {
-        userdb.update(res);
-        res.send("updating the user database...");
+        if(res.message.user.email_address === process.env.DEV_ADMIN){
+            userdb.update(res);
+        }else 
+            res.send('You do not have the rights to update the database')
     });
 };

@@ -1,4 +1,5 @@
+require('dotenv').load();
 var shell = require('shelljs');
-var token = 'xoxb-6098518390-PMvTDFpU7DcunPMV3YIWyYS0';
+var token = process.env.SLACK_TOKEN
 
 shell.exec('HUBOT_SLACK_TOKEN=' + token + ' ./bin/hubot -a slack');

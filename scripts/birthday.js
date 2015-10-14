@@ -1,5 +1,5 @@
 var axios = require('axios');
-var googleApi = require('./googleApi');
+var googleService = require('./googleApi');
 var CronJob = require('cron').CronJob;
 var hogan = require("hogan.js");
 var birthdayTemplates = require('./birthdayMessages.json');
@@ -7,7 +7,7 @@ var birthdayTemplates = require('./birthdayMessages.json');
 module.exports = function(robot) {
     var sendBirthdays = function() {
         // Retrieve from google
-        return googleApi.getNextBirthday().then(function(birthdays) {
+        return googleService.getNextBirthday().then(function(birthdays) {
             var date = new Date();
             var today = date.getFullYear() + '-' + pad(date.getMonth() + 1, 2) + '-' + pad(date.getDate(), 2);
             return birthdays.filter(function(event) {
@@ -27,7 +27,7 @@ module.exports = function(robot) {
             robot.send({
                 room: '#random',
             }, message);
-
+ 
         }).catch(function(err) {
             console.log('err', err);
         });

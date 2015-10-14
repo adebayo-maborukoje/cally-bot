@@ -1,9 +1,12 @@
 var help = require('./help');
 var slackApi = require('./slackapi');
-var googleApi = require('./googleApi');
+var googleService = require('./googleApi');
+var userdb = require('./userdb');
 var moment = require('moment');
 var CronJob = require('cron').CronJob;
 var bluebird = require('bluebird');
+var fellowsLeaveCalendarId = 'andela.co_8q5ndpq7vfikvmrinv0oladgd8@group.calendar.google.com';
+
 
 var exports = module.exports = {};
 //Function helpers
@@ -93,7 +96,7 @@ exports.listAll = function(channelId, userId, res) {
 
     bluebird.all([isMemberPromise, isAdminPromise]).spread(function(isMember, isAdmin) {
         if (isMember || isAdmin) {
-            return googleApi.getAllDates();
+            return googleService.getAllDates();
         } else {
             return [];
         }
@@ -114,7 +117,7 @@ exports.listAll = function(channelId, userId, res) {
 exports.showOne = function(userName, userEmailAdress, res, robot) {
     var names = userEmailAdress.match(/^[^@]+/)[0].split('.');
 
-    googleApi.getAllDates().then(function(data) {
+    googleService.getAllDates().then(function(data) {
         return data.filter(function(x) {
             var name = x.summary
                 .match(/^[^(]*/)[0]
@@ -151,13 +154,48 @@ exports.showOne = function(userName, userEmailAdress, res, robot) {
     });
 };
 
+exports.createLeave = function(name, info, res) {
+
+    info.calendar = fellowsLeaveCalendarId; // bind calendar to info data 
+    findUserByName(name, function(user) {
+        googleService.createLeaveEvent(user, info, res);
+    });
+    // TODO : if user does not exist handle the error here 
+    //verify a couple of things here.
+    // convert strings to dates using moment, check that the date's are date like things
+    // check that endate minus startdate is positive// so we are going in the future,
+    // TODO: this is were will make sure that the date's exclude public holidays and weekends. 
+    //
+    // bind calendar id for staff or fellow to the  to the info.calendar 
+    //
+};
 
 
+
+/*
+ * Helper functions
+ */
+// help parse date info from string to date object
+function momentParse(string) {
+    try {
+        return moment(string);
+    } catch (e) {
+        console.log('logging: error ' + e); // pass exception object to error handler
+    }
+}
+
+var findUserByName = function(name, callback) {
+    userdb.SlackUser.find({
+        handle: name
+    }, function(err, user) {
+        callback(user);
+    });
+};
 
 //Get todays date and calculate one month from now.
 //Used by the Cron Job in createJob
 var sendLeaveNotice = function(dateToQuery, duration) {
-    var namesPromise = googleApi.getAllDates().then(function(leavedates) {
+    var namesPromise = googleService.getAllDates().then(function(leavedates) {
         return leavedates.filter(function(event) {
             return event.start.date === dateToQuery;
         });
@@ -238,6 +276,7 @@ function createJob(deltaTime, duration) {
         sendLeaveNotice(time, duration);
     };
 }
+
 
 
 new CronJob('00 00 11 * * *', createJob({

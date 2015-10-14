@@ -2,7 +2,7 @@ var interview = require('./interview');
 var leave = require('./leave');
 var userdb = require('./userdb');
 var help = require('./help');
-var google = require('./googleApi');
+var googleService = require('./googleApi');
 
 module.exports = function(robot) {
 
@@ -23,11 +23,13 @@ module.exports = function(robot) {
      * LEAVE FUNCTIONALITY
      */
 
-    var userMap = {};
+    var userSlackIdMap = {};
+    var userSlackHandleMap = {};
     var loadData = function(callback) {
         userdb.SlackUser.find(function(err, all) {
             for (var i = 0; i < all.length; i++) {
-                userMap[all[i].slackId] = all[i];
+                userSlackIdMap[all[i].slackId] = all[i];
+                userSlackHandleMap[all[i].name] = all[i];
             }
             callback();
         });
@@ -45,9 +47,21 @@ module.exports = function(robot) {
     robot.respond(/check my leave|cml/i, function(res) {
         loadData(function() {
             var id = res.message.user.id;
-            var eventId = userMap[id].eventArray[0] || '8cndil7vevad21t9vfng6fisn4';
-            google.listFellowEvents(eventId, res);
         });
+    });
+
+    robot.respond(/create event: (.*)/i, function(res){
+        var data = res.match[1].split(/[\s,]+/);
+        var name = data[0];
+         //TODO: Has to exist error handle this use res for it 
+        var info = {
+            name: name,
+            startDate: data[1],
+            endDate: data[2],
+        };
+        //all three fields must exist.
+        res.send('setting up '+name+ '\'s leave...');
+        leave.createLeave(name, info, res);
     });
 
 

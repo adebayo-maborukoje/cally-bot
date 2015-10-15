@@ -11,7 +11,7 @@ var Schema = mongoose.Schema,
 var SlackUser = new Schema({
     slackId: String,
     email: String,
-    handle: String, 
+    handle: String,
     realName: String
 });
 var SlackUser = mongoose.model('SlackUser', SlackUser);
@@ -40,18 +40,19 @@ var LeaveEvent = new Schema({
     userEmail: String,
     slackId: String,
     googleEventId: String,
+    calendarId: String,
     startDate: Date,
     endDate: Date,
     numberOfDaysBooked: Number,
-    hasBeenTaken: Boolean  //flag
+    hasBeenTaken: Boolean //flag
 });
 var LeaveEvent = mongoose.model('LeaveEvent', LeaveEvent);
 
 
 exports.saveLeaveEvent = function(eventObject, res) {
     var leaveEvent = new LeaveEvent();
-    var momentStartDate = moment(eventObject.startDate.replace('-',' '), 'YYYY MM DD'),
-        momentEndDate = moment(eventObject.endDate.replace('-',' '), 'YYYY MM DD'),
+    var momentStartDate = moment(eventObject.startDate.replace('-', ' '), 'YYYY MM DD'),
+        momentEndDate = moment(eventObject.endDate.replace('-', ' '), 'YYYY MM DD'),
         dur = momentEndDate.diff(momentStartDate);
 
     leaveEvent.userId = eventObject.userId
@@ -59,12 +60,22 @@ exports.saveLeaveEvent = function(eventObject, res) {
     leaveEvent.userEmail = eventObject.email;
     leaveEvent.googleEventId = eventObject.googleEventId;
     leaveEvent.startDate = eventObject.startDate;
+    leaveEvent.calendarId = eventObject.calendarId;
     leaveEvent.endDate = eventObject.endDate;
     leaveEvent.numberOfDaysBooked = moment.duration(dur).asDays();
     leaveEvent.hasBeenTaken = moment().diff(momentStartDate) > 1; //true if today is in the future of the start date.
     //save to the database.
     leaveEvent.save();
-    res.send("done")
+    res.send('done')
+};
+
+exports.deleteLeaveEvent = function(leaveId, res) {
+    LeaveEvent.findOne({
+        _id: leaveId
+    }, function(err, leave){
+        leave.remove();
+        res.send('done');
+    });
 };
 
 

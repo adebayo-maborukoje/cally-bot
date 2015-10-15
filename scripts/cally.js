@@ -22,7 +22,6 @@ module.exports = function(robot) {
     /**
      * LEAVE FUNCTIONALITY
      */
-
     var userSlackIdMap = {};
     var userSlackHandleMap = {};
     var loadData = function(callback) {
@@ -34,7 +33,6 @@ module.exports = function(robot) {
             callback();
         });
     };
-
 
     robot.respond(/list-all/i, function(res) {
         leave.listAll('G064YFGG1', res.message.user.id, res);
@@ -63,6 +61,18 @@ module.exports = function(robot) {
         res.send('setting up '+name+ '\'s leave...');
         leave.createLeave(name, info, res);
     });
+
+    robot.respond(/remove leave: (.*)/i, function(res){
+        var data = res.match[1].split(/[\s,]+/);
+        var info = {
+            email: data[0],
+            startDate: data[1]
+        }
+        res.send('deleting...');
+        //TODO: the fields have to exist
+        leave.deleteLeave(info, res);
+    })
+
 
 
     /**

@@ -6,10 +6,105 @@ var moment = require('moment');
 var CronJob = require('cron').CronJob;
 var bluebird = require('bluebird');
 var fellowsLeaveCalendarId = 'andela.co_8q5ndpq7vfikvmrinv0oladgd8@group.calendar.google.com';
+var staffLeaveCalendarId = 'andela.co_vq4m4skcvvg16f4r7mj33etsk8@group.calendar.google.com';
+
 
 
 var exports = module.exports = {};
-//Function helpers
+
+exports.listAll = function(channelId, userId, res) {
+    var isMemberPromise = slackApi.getGroup(channelId, userId).then(function(isMember) {
+        return (isMember !== -1);
+    });
+    var isAdminPromise = slackApi.getUserFromSlack(userId);
+
+    bluebird.all([isMemberPromise, isAdminPromise]).spread(function(isMember, isAdmin) {
+        if (isMember || isAdmin) {
+            return googleService.getAllDates();
+        } else {
+            return [];
+        }
+    }).then(function(dates) {
+        var messages = dates.map(function(date) {
+            var name = date.summary.match(/^[^(]*/)[0];
+            var status = date.status;
+            var startDates = date.start.date || date.start.dateTime;
+            var endDate = date.end.date || date.end.dateTime;
+            return '```' + name + ' - from ' + getDayOfTheWeek(startDates) + ' - to ' + getDayOfTheWeek(endDate) + ' - ' + status + '```';
+        });
+        res.send(messages.join('\n'));
+    }).catch(function(err) {
+        console.log('Error', err.stack);
+    });
+};
+
+exports.showOne = function(userName, userEmailAdress, res, robot) {
+    var names = userEmailAdress.match(/^[^@]+/)[0].split('.');
+
+    googleService.getAllDates().then(function(data) {
+        return data.filter(function(x) {
+            var name = x.summary
+                .match(/^[^(]*/)[0]
+                .trim().toLowerCase();
+
+            return names.every(function(y) {
+                return name.includes(y);
+            });
+        });
+    }).then(function(result) {
+        var message = result.map(function(data) {
+            var status = data.status;
+            var startDate = data.start.date || data.start.dateTime;
+            var endDate = data.end.date || data.end.dateTime;
+            return "Start Day:" + getDayOfTheWeek(startDate) + ". End Date: " + getDayOfTheWeek(endDate) + ",  Status :" + status;
+        });
+        return (message.join('\n'));
+    }).then(function(result) {
+        if (!result) {
+            res.send("I'm sorry " + userName + ", it seems your leave date has not been registered. kindly contact people-intern@andela.com for more information.")
+            return;
+        }
+        var msg = "Hey " + userName + " trust you are doing well :smile: this is the information I found about your leave :\n" + result + " \n Contact people-intern@andela.co for more info.";
+
+        robot.emit('slack-attachment', {
+            content: {
+                fallback: msg,
+                pretext: "Leave Request Information",
+                text: msg,
+                color: '#7CD197'
+            },
+            channel: userName
+        });
+    });
+};
+
+exports.createLeave = function(name, info, res) {
+
+    info.calendarId = fellowsLeaveCalendarId; // bind calendar to info data 
+    findUserByName(name, function(user) {
+        googleService.createLeaveEvent(user, info, res);
+    });
+    // TODO : if user does not exist handle the error here 
+    //verify a couple of things here.
+    // convert strings to dates using moment, check that the date's are date like things
+    // check that endate minus startdate is positive// so we are going in the future,
+    // TODO: this is were will make sure that the date's exclude public holidays and weekends. 
+    //
+    // bind calendar id for staff or fellow to the  to the info.calendar 
+    //
+};
+
+exports.deleteLeave = function(info, res) {
+    findLeaveByUserEmailAndStartDate(info, function(leave){
+        googleService.removeLeaveEvent(leave, res);
+    });
+};
+
+
+
+/*
+ * Helper functions
+ */
 
 // Polyfill in other to use includes.
 String.prototype.includes = function(value) {
@@ -87,95 +182,9 @@ function levenshteinDistance(a, b) {
     return matrix[b.length][a.length];
 }
 
-
-exports.listAll = function(channelId, userId, res) {
-    var isMemberPromise = slackApi.getGroup(channelId, userId).then(function(isMember) {
-        return (isMember !== -1);
-    });
-    var isAdminPromise = slackApi.getUserFromSlack(userId);
-
-    bluebird.all([isMemberPromise, isAdminPromise]).spread(function(isMember, isAdmin) {
-        if (isMember || isAdmin) {
-            return googleService.getAllDates();
-        } else {
-            return [];
-        }
-    }).then(function(dates) {
-        var messages = dates.map(function(date) {
-            var name = date.summary.match(/^[^(]*/)[0];
-            var status = date.status;
-            var startDates = date.start.date || date.start.dateTime;
-            var endDate = date.end.date || date.end.dateTime;
-            return '```' + name + ' - from ' + getDayOfTheWeek(startDates) + ' - to ' + getDayOfTheWeek(endDate) + ' - ' + status + '```';
-        });
-        res.send(messages.join('\n'));
-    }).catch(function(err) {
-        console.log('Error', err.stack);
-    });
-};
-
-exports.showOne = function(userName, userEmailAdress, res, robot) {
-    var names = userEmailAdress.match(/^[^@]+/)[0].split('.');
-
-    googleService.getAllDates().then(function(data) {
-        return data.filter(function(x) {
-            var name = x.summary
-                .match(/^[^(]*/)[0]
-                .trim().toLowerCase();
-
-            return names.every(function(y) {
-                return name.includes(y);
-            });
-        });
-    }).then(function(result) {
-        var message = result.map(function(data) {
-            var status = data.status;
-            var startDate = data.start.date || data.start.dateTime;
-            var endDate = data.end.date || data.end.dateTime;
-            return "Start Day:" + getDayOfTheWeek(startDate) + ". End Date: " + getDayOfTheWeek(endDate) + ",  Status :" + status;
-        });
-        return (message.join('\n'));
-    }).then(function(result) {
-        if (!result) {
-            res.send("I'm sorry " + userName + ", it seems your leave date has not been registered. kindly contact people-intern@andela.com for more information.")
-            return;
-        }
-        var msg = "Hey " + userName + " trust you are doing well :smile: this is the information I found about your leave :\n" + result + " \n Contact people-intern@andela.co for more info.";
-
-        robot.emit('slack-attachment', {
-            content: {
-                fallback: msg,
-                pretext: "Leave Request Information",
-                text: msg,
-                color: '#7CD197'
-            },
-            channel: userName
-        });
-    });
-};
-
-exports.createLeave = function(name, info, res) {
-
-    info.calendar = fellowsLeaveCalendarId; // bind calendar to info data 
-    findUserByName(name, function(user) {
-        googleService.createLeaveEvent(user, info, res);
-    });
-    // TODO : if user does not exist handle the error here 
-    //verify a couple of things here.
-    // convert strings to dates using moment, check that the date's are date like things
-    // check that endate minus startdate is positive// so we are going in the future,
-    // TODO: this is were will make sure that the date's exclude public holidays and weekends. 
-    //
-    // bind calendar id for staff or fellow to the  to the info.calendar 
-    //
-};
-
-
-
 /*
- * Helper functions
- */
-// help parse date info from string to date object
+ * help parse date info from string to date object
+*/
 function momentParse(string) {
     try {
         return moment(string);
@@ -191,6 +200,16 @@ var findUserByName = function(name, callback) {
         callback(user);
     });
 };
+
+var findLeaveByUserEmailAndStartDate = function(info, callback){
+    userdb.LeaveEvent.find({
+        userEmail: info.email,
+        startDate: info.startDate
+    }, function(err, leave){
+        callback(leave);
+    })
+}
+
 
 //Get todays date and calculate one month from now.
 //Used by the Cron Job in createJob

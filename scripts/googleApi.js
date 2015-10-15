@@ -137,44 +137,29 @@ exports.createLeaveEvent = function(user, info, res) {
             'email': 'people-intern@andela.com'
         }]
     };
-
-    fs.readFileAsync(serviceKeyFile).then(function(val) {
-            return new google.auth.JWT(
-                '49577347286-824dakpish13virhq8lbinnjn987bqj6@developer.gserviceaccount.com',
-                null, val, ['https://www.googleapis.com/auth/calendar'],
-                'people-intern@andela.com');
-        }).then(function(authClient) {
-            authClient.authorize(function(err, tokens) {
-                if (err) {
-                    console.log(err);
-                    return;
-                }
-                calendar.events.insert({
-                    auth: authClient,
-                    calendarId: info.calendarId,
-                    resource: eventDetails,
-                }, function(err, event) {
-                    if (err) {
-                        console.log('There was an error contacting the Calendar service: ' + err);
-                        return;
-                    }
-                    //event details at this point i would like to save the evnets to the databsase
-                    var eventObject = {
-                        userId: user._id,
-                        slackId: user.slackId,
-                        email: user.email,
-                        calendarId: info.calendarId,
-                        googleEventId: event.id,
-                        startDate: info.startDate,
-                        endDate: info.endDate
-                    };
-                    userdb.saveLeaveEvent(eventObject, res);
-                });
-            });
-        })
-        .catch(function(e) {
-            console.error("unable to read file");
+    authorizeApp(function(authClient){
+        calendar.events.insert({
+            auth: authClient,
+            calendarId: info.calendarId,
+            resource: eventDetails,
+        }, function(err, event) {
+            if (err) {
+                console.log('There was an error contacting the Calendar service: ' + err);
+                return;
+            }
+            //event details at this point i would like to save the evnets to the databsase
+            var eventObject = {
+                userId: user._id,
+                slackId: user.slackId,
+                email: user.email,
+                calendarId: info.calendarId,
+                googleEventId: event.id,
+                startDate: info.startDate,
+                endDate: info.endDate
+            };
+            userdb.saveLeaveEvent(eventObject, res);
         });
+    })
 };
 
 exports.removeLeaveEvent = function(leave, res) {

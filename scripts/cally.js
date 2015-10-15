@@ -3,6 +3,9 @@ var leave = require('./leave');
 var userdb = require('./userdb');
 var help = require('./help');
 var googleService = require('./googleApi');
+var STAFF_RIGHTS = function(res) {
+    return res.message.user.email_address === process.env.STAFF_ADMIN
+};
 
 module.exports = function(robot) {
 
@@ -48,29 +51,33 @@ module.exports = function(robot) {
         });
     });
 
-    robot.respond(/create event: (.*)/i, function(res){
+    robot.respond(/create event: (.*)/i, function(res) {
         var data = res.match[1].split(/[\s,]+/);
         var name = data[0];
-         //TODO: Has to exist error handle this use res for it 
+        //TODO: Has to exist error handle this use res for it 
         var info = {
             name: name,
             startDate: data[1],
             endDate: data[2],
         };
         //all three fields must exist.
-        res.send('setting up '+name+ '\'s leave...');
+        res.send('setting up ' + name + '\'s leave...');
         leave.createLeave(name, info, res);
     });
 
-    robot.respond(/remove leave: (.*)/i, function(res){
+    robot.respond(/remove leave: (.*)/i, function(res) {
         var data = res.match[1].split(/[\s,]+/);
         var info = {
             email: data[0],
             startDate: data[1]
         }
-        res.send('deleting...');
-        //TODO: the fields have to exist
-        leave.deleteLeave(info, res);
+        if (STAFF_RIGHTS(res)) {
+         res.send('deleting...');
+         //TODO: the fields have to exist
+         leave.deleteLeave(info, res);   
+        }else {
+            res.send('You do not have the rights to remove from the leave calendar')
+        }
     })
 
 
@@ -90,9 +97,9 @@ module.exports = function(robot) {
      */
 
     robot.respond(/update/i, function(res) {
-        if(res.message.user.email_address === process.env.DEV_ADMIN){
+        if (res.message.user.email_address === process.env.DEV_ADMIN) {
             userdb.update(res);
-        }else 
+        } else
             res.send('You do not have the rights to update the database')
     });
 };

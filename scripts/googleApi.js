@@ -198,3 +198,5 @@ var authorizeApp = function(callback) {
         console.log("unable to read file");
     });
 };
+
+exports.authorizeApp = authorizeApp;

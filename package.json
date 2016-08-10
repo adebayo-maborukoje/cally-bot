@@ -38,6 +38,7 @@
     "node": "0.10.x"
   },
   "devDependencies": {
+    "async": "^1.4.2",
     "mongoose": "^4.1.0"
   }
 }
